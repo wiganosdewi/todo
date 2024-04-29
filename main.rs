@@ -17,36 +17,56 @@ fn main() {
             show_todos(&todos_vec);
         }
         println!("");
-        println!("type 'add', 'edit' or 'remove' to change todos");
+        println!("type 'add', 'check' or 'remove' to change todos or type 'q' to quit");
         let mut input = String::new();
 
         io::stdin()
             .read_line(&mut input)
             .expect("unable to read line");
 
-        let input = input.trim();
-        let mut vec = vec![];
+        let command: &str;
+        let parameter: Option<&str>;
 
-        for str_element in input.split_whitespace() {
-            vec.push(str_element);
+        match input.trim().split_once(" ") {
+            Some(t) => (command, parameter) = (t.0, Some(t.1)),
+            None => {
+                command = input.trim();
+                parameter = None;
+            }
         }
-        match vec[0] {
-            "add" => {
-                vec.remove(0);
-                for input in vec {
-                    todos_vec.push(add_todo(id, input));
-                id += 1;
+
+            match command {
+                "add" => {
+                    if let Some(parameter) = parameter {
+                        todos_vec.push(add_todo(id, parameter));
+                        id += 1;
+                    } else {
+                        println!("enter a todo description after the 'add'");
+                    }
+                }
+                "check" => {
+                    if let Some(parameter) = parameter {
+                        let parameter: usize = match parameter.parse() {
+                            Ok(t) => t,
+                            Err(e) => {
+                                println!("type a number, {e}");
+                                continue;
+                            }
+                        };
+                        todos_vec[parameter].done = !todos_vec[parameter].done;
+                    } else {
+                        println!("enter a id for the todo you want to check");
+                    }
+                }
+                "remove" => continue,
+                "help" => continue,
+                "q" => process::exit(0),
+                _ => {
+                    println!("unknown command");
+                    continue;
                 }
             }
-            "edit" => continue,
-            "remove" => continue,
-            "help" => continue,
-            "q" => process::exit(0),
-            _ => {
-                println!("unknown command");
-                continue;
-            }
-        }
+
         println!("");
     }
 }
