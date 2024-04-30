@@ -8,16 +8,26 @@ struct Todo {
 
 fn main() {
     let mut todos_vec: Vec<Todo> = vec![];
-    let mut id: u32 = 1;
+    let mut id: u32 = 0;
 
     loop {
         if todos_vec.len() == 0 {
             println!("create your first todo!");
         } else {
+            let mut checked_todos = 0;
+            for todo in &todos_vec {
+                if todo.done {
+                    checked_todos += 1;
+                }
+            }
+            if checked_todos == todos_vec.len() {
+                println!("Congratulations! You have completed all your todos!");
+                println!("");
+            }
             show_todos(&todos_vec);
         }
         println!("");
-        println!("type 'add', 'check' or 'remove' to change todos or type 'q' to quit");
+        println!("type [a]dd  [c]heck  [r]emove  [q]uit  or  [h]elp for more commands");
         let mut input = String::new();
 
         io::stdin()
@@ -36,7 +46,7 @@ fn main() {
         }
 
             match command {
-                "add" => {
+                "a" | "add" => {
                     if let Some(parameter) = parameter {
                         todos_vec.push(add_todo(id, parameter));
                         id += 1;
@@ -44,7 +54,7 @@ fn main() {
                         println!("enter a todo description after the 'add'");
                     }
                 }
-                "check" => {
+                "c" | "check" => {
                     if let Some(parameter) = parameter {
                         let parameter: usize = match parameter.parse() {
                             Ok(t) => t,
@@ -58,12 +68,32 @@ fn main() {
                         println!("enter a id for the todo you want to check");
                     }
                 }
-                "remove" => continue,
-                "help" => continue,
-                "q" => process::exit(0),
+                "r" | "remove" => { 
+                    if let Some(parameter) = parameter {
+                        let parameter: usize = match parameter.parse() {
+                            Ok(t) => t,
+                            Err(e) => {
+                                println!("type a number, {e}");
+                                continue;
+                            }
+                        };
+                        todos_vec.remove(parameter);
+                    } else {
+                        println!("enter a id for the todo you want to remove");
+                    }
+                }
+                "s" | "save" => continue,
+                "l" | "load" => continue,
+                "h" | "help" => {
+                    println!("list of commands");
+                    println!("");
+                    println!(" - add - type 'add' or 'a' and a todo item description to add a new todo");
+                    println!(" - check - type 'check' or 'c' and a todo item id to change from not done to done and the other way around");
+                    println!(" - remove - type 'remove' or 'r' and a todo item id to remove a todo from the list");
+                }
+                "q" | "quit" => process::exit(0),
                 _ => {
                     println!("unknown command");
-                    continue;
                 }
             }
 
